@@ -1,26 +1,36 @@
 // loadBalancer.js
+const express = require('express');
 const httpProxy = require('http-proxy');
+// const loginServiceRoute =  require('../routes/loginServiceRoute');
+// const soalServiceRoute = require('../routes/soalServiceRoute');
+// const modulServiceRoute = require('../routes/modulServiceRoute');
 
-const servers = [
-  { host: 'localhost', port: 5000 },
-  { host: 'localhost', port: 5001 },
-  // Tambahkan server sesuai kebutuhan
+const app = express();
+const proxy = httpProxy.createProxyServer();
+
+const services = [
+  { path: '/api/user', target: 'http://localhost:3000' },  // Menyesuaikan path dan target
+  { path: '/api/soal', target: 'http://localhost:3012' },  // Menyesuaikan path dan target
+  { path: '/api/modul', target: 'http://localhost:3011' }, // Menyesuaikan path dan target
+  // Tambahkan service sesuai kebutuhan
 ];
 
-const proxy = httpProxy.createProxyServer({});
+app.all('*', (req, res) => {
+  const path = req.path;
 
-let currentServerIndex = 0;
+  const selectedService = services.find(service => path.startsWith(service.path));
 
-function loadBalancerMiddleware(req, res) {
-  const selectedServer = servers[currentServerIndex];
-  currentServerIndex = (currentServerIndex + 1) % servers.length;
+  if (selectedService) {
+    proxy.web(req, res, {
+      target: selectedService.target,
+    });
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
 
-  proxy.web(req, res, {
-    target: {
-      host: selectedServer.host,
-      port: selectedServer.port,
-    },
-  });
-}
+// app.use('/api/user', loginServiceRoute);
+// app.use('/api/soal', soalServiceRoute);
+// app.use('/api/modul', modulServiceRoute);
 
-module.exports = loadBalancerMiddleware;
+module.exports = app;

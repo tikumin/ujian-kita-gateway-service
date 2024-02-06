@@ -3,14 +3,12 @@ const axiosInstance = require('../helper/axiosInstance')
 
 exports.createModul = async (req,res) => {
     try {
-        if(req.user.role == 'admin'){
-        axiosInstance.post('http://localhost:3011/api/modul/',{
-            token: {
-                userID: req.user.sub,
-                role: req.user.role,
-            },
+        const data = {
+            token: req.user,
             data: req.body
-        })
+        }
+        if(req.user.role == 'admin'){
+        axiosInstance.post('http://localhost:3011/api/modul/', data)
         .then((response) => {
             res.send( response.data);
           })
@@ -24,13 +22,14 @@ exports.createModul = async (req,res) => {
             });
         };
     } catch (err) {
-        res.status(500).json({success:false, message: 'Error creating soal', error: error.message });
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
     }
 };
 
 exports.listModul = async (req,res) =>{
     try {
-        axiosInstance.get('http://localhost:3011/api/modul/', req.query)
+        axiosInstance.get('http://localhost:3011/api/modul/', {params: req.query})
         .then((response) => {
             res.send( response.data);
         })
@@ -45,7 +44,7 @@ exports.listModul = async (req,res) =>{
 
 exports.getModulByID = async (req, res) => {
     try {
-        axiosInstance.get('http://localhost:3011/api/modul/:id')
+        axiosInstance.get(`http://localhost:3011/api/modul/${req.params.id}`)
         .then((response) => {
             res.send( response.data);
         })
@@ -60,10 +59,7 @@ exports.getModulByID = async (req, res) => {
 exports.editModul = async (req,res) => {
     try {
         if(req.user.role == 'admin'){
-        axiosInstance.put('http://localhost:3011/api/modul/:id',{
-            id: req.parms.id, 
-            data: req.body
-        })
+        axiosInstance.put(`http://localhost:3011/api/modul/${req.params.id}`, req.body)
         .then((response) => {
             res.send( response.data);
           })
@@ -84,7 +80,7 @@ exports.editModul = async (req,res) => {
 exports.deleteModul = async (req,res) => {
     try {
         if(req.user.role == 'admin'){
-        axiosInstance.delete('http://localhost:3011/api/modul/:id')
+        axiosInstance.delete(`http://localhost:3011/api/modul/${req.params.id}`)
         .then((response) => {
             res.send( response.data);
           })

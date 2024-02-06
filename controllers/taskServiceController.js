@@ -1,19 +1,19 @@
 const { response } = require('express');
 const axiosInstance = require('../helper/axiosInstance')
 
-exports.createSoal = async (req,res) => {
+exports.createTask = async (req,res) => {
     try {
         const data = {
             token: req.user,
             data: req.body
         }
         if(req.user.role == 'admin'){
-        axiosInstance.post('http://localhost:3012/api/soal/create',data)
+        axiosInstance.post('http://localhost:3099/api/task/create', data)
         .then((response) => {
             res.send( response.data);
           })
           .catch((error) => {
-            res.send( error.response ? error.response.status : 400);
+            res.send( error);
           });
         }else{
             res.status(403).json({
@@ -27,46 +27,50 @@ exports.createSoal = async (req,res) => {
     }
 };
 
-exports.listSoal = async (req,res) =>{
+exports.listTask = async (req,res) =>{
     try {
-        axiosInstance.get('http://localhost:3012/api/soal/', {params: req.query})
+        axiosInstance.get('http://localhost:3099/api/task/', {params: req.query})
         .then((response) => {
             res.send( response.data);
         })
         .catch((error) => {
-            res.send( error.response ? error.response.status : 400);
+            res.send( error);
         });
     
-    } catch (err) {
+    } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
         res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
     }
 };
 
-exports.findSoal = async (req, res) => {
+exports.getTask = async (req,res) => {
     try {
-        axiosInstance.get(`http://localhost:3012/api/soal/${req.params.id}`)
-        .then((response) => {
-            res.send( response.data);
-        })
-        .catch((error) => {
-            res.send( error.response ? error.response.status : 400);
-        });
-    } catch (err) {
-        console.error('Error:', error.response ? error.response.data : error.message);
-        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
-    }
-};
-
-exports.editSoal = async (req,res) => {
-    try {
-        if(req.user.role == 'admin'){
-            axiosInstance.put(`http://localhost:3012/api/soal/${req.params.id}`, req.body)
+        axiosInstance.get(`http://localhost:3099/api/task/${req.params.id}`)
         .then((response) => {
             res.send( response.data);
           })
           .catch((error) => {
-            res.send( error.response ? error.response.status : 400);
+            res.send( error);
+          });
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
+      }
+};
+
+exports.editTask = async (req,res) => {
+    try {
+        const data = {
+            token: req.user,
+            data: req.body
+        }
+        if(req.user.role == 'admin'){
+        axiosInstance.put(`http://localhost:3099/api/task/${req.params.id}`, data)
+        .then((response) => {
+            res.send( response.data);
+          })
+          .catch((error) => {
+            res.send( error);
           });
         }else{
             res.status(403).json({
@@ -75,24 +79,20 @@ exports.editSoal = async (req,res) => {
             });
         };
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-          success: false,
-          message: 'Error updating soal',
-          error: error.message,
-        });
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
       }
-    };
+};
 
-exports.deleteSoal = async (req,res) => {
+exports.editStatusBulk = async (req,res) => {
     try {
-        if(req.user.role == 'admin'){
-        axiosInstance.delete(`http://localhost:3012/api/soal/${req.params.id}`, {params: req.query})
+        if(req.user.role == 'admin'|| req.user.role == 'guru'){
+        axiosInstance.put(`http://localhost:3099/api/task/status`, req.body)
         .then((response) => {
             res.send( response.data);
           })
           .catch((error) => {
-            res.send( error.response ? error.response.status : 400);
+            res.send( error);
           });
         }else{
             res.status(403).json({
@@ -100,21 +100,38 @@ exports.deleteSoal = async (req,res) => {
                 message: 'access denied only for admins'
             });
         };
-    } catch (err) {
-        res.status(500).json({success:false, message: 'Error creating soal', error: error.message });
-    }
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
+      }
 };
 
-exports.healthSoal = async (req, res) => {
+exports.deleteTask = async (req,res) => {
     try {
-        axiosInstance.get(`http://localhost:3012/api/soal/health`)
+        axiosInstance.delete(`http://localhost:3099/api/task/${req.params.id}`)
+        .then((response) => {
+            res.send( response.data);
+          })
+          .catch((error) => {
+            res.send( error);
+          });
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
+      }
+};
+
+
+exports.healthTask = async (res) => {
+    try {
+        axiosInstance.get(`http://localhost:3001/api/task/health`)
         .then((response) => {
             res.send( response.data);
         })
         .catch((error) => {
             res.send( error.response ? error.response.status : 400);
         });
-      } catch (err) {
+      } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
         res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
       }
