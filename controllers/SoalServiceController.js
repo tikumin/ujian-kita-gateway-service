@@ -118,6 +118,7 @@ exports.healthSoal = async (req, res) => {
         console.error('Error:', error.response ? error.response.data : error.message);
         res.status(error.response ? error.response.status : 500).json({ success: false, message: 'Error calling API', error: error.response ? error.response.data : error.message });
       }
+<<<<<<< HEAD
   };
 
 
@@ -190,3 +191,6 @@ exports.createSoal2 = async (req, res) => {
         res.status(err.response ? err.response.status : 500).json({ success: false, message: 'Error calling API', error: err.response ? err.response.data : err.message });
     }
 };
+=======
+  };
+>>>>>>> cd61991dccce4091845ef34fc3d6579c27a5fe7b
